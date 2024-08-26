@@ -1,4 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { ConfigService } from '../../config.service';
+import { Course } from '../../shared/models/course.model';
 
 @Component({
   selector: 'app-practice',
@@ -7,24 +9,30 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class PracticeComponent implements OnInit {
   @Input() courseId!: string;
-  questions!: any[]; // This should be replaced with the actual type
+  questions: any[] = [];  // Consider creating a more specific type for questions if needed
   currentQuestionIndex = 0;
 
-  constructor() { }
+  constructor(private configService: ConfigService) {}
 
   ngOnInit(): void {
-    // Load questions based on courseId, for example from a service
+    this.configService.getConfig().subscribe(config => {
+      const course = config.courses.find((c: Course) => c.id === this.courseId);
+      if (course && course.data) {
+        this.questions = course.data;
+      }
+    });
   }
 
   nextQuestion(): void {
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
     } else {
-      // Maybe show a completion message or handle the end of the practice session
+      this.currentQuestionIndex = 0;  // Loop back to the first question
     }
   }
 
   checkAnswer(selectedAnswer: string): void {
-    // Logic to check the selected answer against the correct one
+    let correctAnswer = this.questions[this.currentQuestionIndex].answer;
+    // Compare selectedAnswer with correctAnswer
   }
 }
