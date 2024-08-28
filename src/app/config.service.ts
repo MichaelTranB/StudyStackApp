@@ -71,7 +71,7 @@ export class ConfigService {
           "data": [
             {
               "question": "What is SQL?",
-              "answer": "SQL stands for Structured Query Language, and it is used to communicate with a database."
+              "answer": "SQL stands for Structured Query Language, and it is used to communicate with a database Test data 123."
             },
             {
               "question": "What does 'SELECT' do in SQL?",
