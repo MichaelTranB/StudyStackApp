@@ -6,6 +6,7 @@ import { DashboardPageRoutingModule } from './dashboard-routing.module';
 import { DashboardPage } from './dashboard.page';
 import { DashboardCardComponent } from './dashboard-card/dashboard-card.component';
 import { ConfigService } from 'C:/Users/tran0/Desktop/bookings/src/app/config.service';
+import { EditCourseComponent } from './edit-course/edit-course.component';
 
 @NgModule({
   imports: [
@@ -15,6 +16,6 @@ import { ConfigService } from 'C:/Users/tran0/Desktop/bookings/src/app/config.se
     DashboardPageRoutingModule
   ],
   providers: [ConfigService],
-  declarations: [DashboardPage, DashboardCardComponent], 
+  declarations: [DashboardPage, DashboardCardComponent, EditCourseComponent], 
 })
 export class DashboardModule {}
