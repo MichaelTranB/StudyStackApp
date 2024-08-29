@@ -9,6 +9,7 @@ const routes: Routes = [
     component: FlashcardPage
   }
 ];
+
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],

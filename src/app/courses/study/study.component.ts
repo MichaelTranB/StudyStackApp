@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ConfigService } from '../../config.service';
-import { Course } from '../../shared/models/course.model';
 import { Set } from '../../shared/models/set.model';
 import { BaseComponent } from '../base/base.component';
 
@@ -18,12 +17,13 @@ export class StudyComponent extends BaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.configService.getCourses().subscribe(courses => {
-      const course = courses.find((c: Course) => c.id === this.courseId);
+      const course = courses.find(c => c.id === this.courseId);
       if (course && course.questions) {
         this.studyMaterials = course.questions as Set[];
-        console.log("Study materials loaded for course ID:", this.courseId);
+        console.log("Study materials loaded:", this.studyMaterials);
       } else {
         console.error("No data found for course:", this.courseId);
+        this.studyMaterials = [];
       }
     });
   }

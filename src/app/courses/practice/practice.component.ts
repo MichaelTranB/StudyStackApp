@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ConfigService } from '../../config.service';
-import { Course } from '../../shared/models/course.model';
 import { Set } from '../../shared/models/set.model';
 
 @Component({
@@ -18,11 +17,13 @@ export class PracticeComponent implements OnInit {
 
   ngOnInit(): void {
     this.configService.getCourses().subscribe(courses => {
-      const course = courses.find((c: Course) => c.id === this.courseId);
+      const course = courses.find(c => c.id === this.courseId);
       if (course && course.questions) {
         this.questions = course.questions as Set[];
+        console.log("Questions loaded:", this.questions);
       } else {
         console.error("No data found for course:", this.courseId);
+        this.questions = [];  // Ensure questions is an empty array instead of undefined
       }
     });
   }

@@ -22,7 +22,7 @@ export class ConfigService {
         id,
         name,
         description,
-        questions (
+        questions:questions (
           question,
           answer
         )
@@ -33,6 +33,16 @@ export class ConfigService {
       return [];
     }
 
-    return courses || [];
+    if (!courses || courses.length === 0) {
+      console.error('No courses found.');
+      return [];
+    }
+
+    return courses.map(course => ({
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      questions: course.questions || []
+    }));
   }
 }
