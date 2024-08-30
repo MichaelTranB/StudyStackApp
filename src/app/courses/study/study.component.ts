@@ -12,14 +12,14 @@ export class StudyComponent extends BaseComponent implements OnInit {
   studyMaterials: Set[] = [];
 
   constructor(private configService: ConfigService) {
-    super(); // Call the base class constructor
+    super();  // Call the base class constructor
   }
 
   ngOnInit(): void {
     this.configService.getCourses().subscribe(courses => {
-      const course = courses.find(c => c.id === this.courseId);
-      if (course && course.questions) {
-        this.studyMaterials = course.questions as Set[];
+      const course = courses.find(c => c.id === +this.courseId);  // Convert courseId to number for comparison
+      if (course && course.components.study) {
+        this.studyMaterials = course.components.study.questions as Set[];  // Assume study contains questions
         console.log("Study materials loaded:", this.studyMaterials);
       } else {
         console.error("No data found for course:", this.courseId);

@@ -1,9 +1,9 @@
 export interface Course {
-    id: string;
+    id: number;
     name: string;
     description: string;
     components: {
-      practice: any;  // Consider using specific types if possible
+      practice: any;  
       study: any;
     };
   }
