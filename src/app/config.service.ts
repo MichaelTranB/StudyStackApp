@@ -39,15 +39,27 @@ export class ConfigService {
       return [];
     }
 
-    // Map questions to the practice and study components
     return courses.map(course => ({
       id: course.id,
       name: course.name,
       description: course.description,
       components: {
-        practice: { questions: course.questions || [] },  // Assign questions to practice component
-        study: { questions: course.questions || [] }      // Assign questions to study component
+        practice: { questions: course.questions || [] },
+        study: { questions: course.questions || [] }
       }
     }));
+  }
+
+  // Add a new question and answer to a specific course
+  async addQuestionToCourse(courseId: number, question: string, answer: string): Promise<void> {
+    const { data, error } = await supabase
+      .from('questions')
+      .insert([{ course_id: courseId, question, answer }]);
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('Question added:', data);
   }
 }
