@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ConfigService } from '../../config.service';
 import { Set } from '../../shared/models/set.model';
+import { ModalController } from '@ionic/angular';
+import { WriteModalComponent } from '../../dashboard/flashcard/write-modal/write-modal.component'; 
 
 @Component({
   selector: 'app-practice',
@@ -13,7 +15,9 @@ export class PracticeComponent implements OnInit {
   currentQuestionIndex = 0;  // Keeps track of the current question in the practice session
   showAnswer = false;  // Controls whether the answer is visible
 
-  constructor(private configService: ConfigService) {}
+  isReadMode = true;  // Determines whether the component is in Read or Write mode
+
+  constructor(private configService: ConfigService, private modalController: ModalController) {}
 
   ngOnInit(): void {
     this.configService.getCourses().subscribe(courses => {
@@ -28,16 +32,17 @@ export class PracticeComponent implements OnInit {
     });
   }
 
-  // Handle the Read button click
-  onRead(): void {
-    console.log('Read button clicked');
-    // Implement your Read button functionality here
+  // Switch to Read mode
+  switchToReadMode() {
+    this.isReadMode = true;
   }
 
-  // Handle the Write button click
-  onWrite(): void {
-    console.log('Write button clicked');
-    // Implement your Write button functionality here
+  // Open the write modal
+  async openWriteModal() {
+    const modal = await this.modalController.create({
+      component: WriteModalComponent
+    });
+    return await modal.present();
   }
 
   nextQuestion(): void {
