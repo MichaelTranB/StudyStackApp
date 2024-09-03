@@ -28,6 +28,18 @@ export class PracticeComponent implements OnInit {
     });
   }
 
+  // Handle the Read button click
+  onRead(): void {
+    console.log('Read button clicked');
+    // Implement your Read button functionality here
+  }
+
+  // Handle the Write button click
+  onWrite(): void {
+    console.log('Write button clicked');
+    // Implement your Write button functionality here
+  }
+
   nextQuestion(): void {
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
