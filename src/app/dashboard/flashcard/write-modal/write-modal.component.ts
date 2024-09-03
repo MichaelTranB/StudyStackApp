@@ -24,33 +24,40 @@ export class WriteModalComponent implements AfterViewInit {
     const canvas = this.drawingCanvas.nativeElement;
     this.ctx.strokeStyle = '#ffffff';  // Set the stroke color to white
     this.ctx.lineWidth = 2;
-
+  
     let drawing = false;
-
+  
     const startDrawing = (event: MouseEvent) => {
       drawing = true;
       draw(event); // Call the draw function
     };
-
+  
     const stopDrawing = () => {
       drawing = false;
       this.ctx.beginPath(); // Begin a new path to start a new line when the mouse is clicked again
     };
-
+  
     const draw = (event: MouseEvent) => {
       if (!drawing) return;
-
+  
       const rect = canvas.getBoundingClientRect();
-      this.ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+      const scaleX = canvas.width / rect.width;   // Scale factor for horizontal
+      const scaleY = canvas.height / rect.height; // Scale factor for vertical
+  
+      const offsetX = (event.clientX - rect.left) * scaleX;
+      const offsetY = (event.clientY - rect.top) * scaleY;
+  
+      this.ctx.lineTo(offsetX, offsetY);
       this.ctx.stroke();
       this.ctx.beginPath(); // Begin a new path so the line is continuous
-      this.ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+      this.ctx.moveTo(offsetX, offsetY);
     };
-
+  
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mousemove', draw);
   }
+  
 
   // Submit the drawing for evaluation
   submitDrawing() {
