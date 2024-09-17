@@ -11,7 +11,7 @@ import { AuthService, AuthResponseData } from './auth.service';
   templateUrl: './auth.page.html',
   styleUrls: ['./auth.page.scss']
 })
-export class AuthPage implements OnInit {
+export class AuthPage {
   isLoading = false;
   isLogin = true;
 
@@ -21,8 +21,6 @@ export class AuthPage implements OnInit {
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController
   ) {}
-
-  ngOnInit() {}
 
   authenticate(email: string, password: string) {
     this.isLoading = true;
