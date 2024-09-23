@@ -62,4 +62,19 @@ export class ConfigService {
 
     console.log('Question added:', data);
   }
+
+  // Add a method to create a new course with the first question and answer
+  async createNewCourse(courseName: string, description: string): Promise<void> {
+    // Insert a new course with name and description
+    const { data: courseData, error: courseError } = await supabase
+      .from('courses')
+      .insert([{ name: courseName, description }])
+      .select('id');  // Get the course ID of the newly created course
+  
+    if (courseError) {
+      throw courseError;
+    }
+  
+    console.log('New course added:', courseData);
+  }
 }
