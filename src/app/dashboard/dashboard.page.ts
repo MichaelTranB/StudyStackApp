@@ -59,9 +59,16 @@ export class DashboardPage implements OnInit {
     });
   }
 
+  // Navigation to flashcard
   goToFlashcard(mode: string, courseId: string) {
     this.router.navigate(['/flashcard', mode, courseId]);
   }
+
+  // Navigation to quiz
+  goToQuiz(courseId: string) {
+    this.router.navigate(['/quiz', courseId]);
+  }
+
 
   logout() {
     console.log('Logout button clicked');

@@ -6,7 +6,8 @@ import { FlashcardPageRoutingModule } from './flashcard-routing.module';
 import { FlashcardPage } from './flashcard.page';
 import { PracticeComponent } from '../../courses/practice/practice.component';
 import { StudyComponent } from '../../courses/study/study.component';
-import { WriteModalComponent } from './write-modal/write-modal.component';  // Import the new component
+import { QuizComponent } from 'src/app/courses/quiz/quiz.component';
+import { WriteModalComponent } from './write-modal/write-modal.component';
 
 @NgModule({
   imports: [
@@ -17,9 +18,10 @@ import { WriteModalComponent } from './write-modal/write-modal.component';  // I
   ],
   declarations: [
     FlashcardPage,
-    PracticeComponent,  
-    StudyComponent,    
-    WriteModalComponent  // Declare the new component
+    PracticeComponent,   
+    StudyComponent,
+    QuizComponent,
+    WriteModalComponent,   
   ]
 })
 export class FlashcardPageModule {}
