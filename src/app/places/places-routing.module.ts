@@ -60,6 +60,15 @@ const routes: Routes = [
         ]
       },
       {
+        path: 'community',
+        children: [
+          {
+            path: '',
+            loadChildren: () => import('../community/community.module').then(m => m.CommunityPageModule)
+          }
+        ]
+      },
+      {
         path: '',
         redirectTo: '/places/tabs/discover',
         pathMatch: 'full'
