@@ -5,7 +5,7 @@ import { IonicModule } from '@ionic/angular';
 import { DashboardPageRoutingModule } from './dashboard-routing.module';
 import { DashboardPage } from './dashboard.page';
 import { DashboardCardComponent } from './dashboard-card/dashboard-card.component';
-import { ConfigService } from 'C:/Users/tran0/Desktop/bookings/src/app/config.service';
+import { ConfigService } from '../config.service';
 import { EditCourseComponent } from './edit-course/edit-course.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { LogoutComponent } from './logout/logout.component';

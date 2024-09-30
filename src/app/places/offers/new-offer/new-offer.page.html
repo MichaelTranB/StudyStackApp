@@ -38,9 +38,7 @@
       </ion-row>
       <ion-row
         *ngIf="
-          !form.get('description')?.valid && form.get('description')?.touched
-        "
-      >
+          !form.get('description')!.valid && form.get('description')!.touched">
         <ion-col size-sm="6" offset-sm="3">
           <p>Description must be between 1 and 180 characters.</p>
         </ion-col>
@@ -71,16 +69,10 @@
               min="2019-01-02"
               max="2025-12-31"
               formControlName="dateTo"
-              ></ion-datetime>
-            </ion-item>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col size-sm="3" offset-sm="3">
-            <app-location-picker (locationPick)="onLocationPicked($event)"></app-location-picker>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </form>
-  </ion-content>
-  
+            ></ion-datetime>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </form>
+</ion-content>

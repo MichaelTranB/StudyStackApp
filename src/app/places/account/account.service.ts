@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { take, tap, switchMap, map } from 'rxjs/operators';
 
 import { Account } from './account.model';
-import { AuthService } from 'C:/Users/tran0/Desktop/bookings/src/app/auth/auth.service';
+import { AuthService } from '../../auth/auth.service';
 
 interface AccountData {
     userId: string;
