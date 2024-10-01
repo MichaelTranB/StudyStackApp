@@ -8,6 +8,8 @@ import { PracticeComponent } from '../../courses/practice/practice.component';
 import { StudyComponent } from '../../courses/study/study.component';
 import { QuizComponent } from 'src/app/courses/quiz/quiz.component';
 import { WriteModalComponent } from './write-modal/write-modal.component';
+import { QuizResultsComponent } from 'src/app/courses/quiz/quiz-results/quiz-results.component'; 
+
 
 @NgModule({
   imports: [
@@ -21,7 +23,8 @@ import { WriteModalComponent } from './write-modal/write-modal.component';
     PracticeComponent,   
     StudyComponent,
     QuizComponent,
-    WriteModalComponent,   
-  ]
+    WriteModalComponent,
+    QuizResultsComponent 
+  ],
 })
 export class FlashcardPageModule {}

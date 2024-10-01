@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ConfigService } from '../../config.service';
 import { Set } from '../../shared/models/set.model';
+import { ModalController } from '@ionic/angular';
+import { QuizResultsComponent } from './quiz-results/quiz-results.component'; // Import the QuizResultsComponent
 
 @Component({
   selector: 'app-quiz',
@@ -15,20 +17,24 @@ export class QuizComponent implements OnInit {
   selectedOption: string = '';  // The user's selected answer
   correctAnswer: string = '';  // Holds the correct answer for the current question
   selectionLocked = false;  // Locks the selection after the user picks an answer
+  correctAnswersCount = 0;  // Tracks the number of correct answers -
 
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService, private modalCtrl: ModalController) {}
 
   ngOnInit(): void {
     this.loadQuestions();
   }
 
-  // Fetches questions for the quiz
+
   loadQuestions(): void {
     this.configService.getCourses().subscribe(courses => {
-      const course = courses.find(c => c.id === +this.courseId);  // Ensure courseId is treated as a number
+      const course = courses.find(c => c.id === +this.courseId);  
       if (course && course.components.practice) {
         this.questions = course.components.practice.questions as Set[];
-        this.loadOptions();  // Load the options for the first question
+        this.loadOptions();  
+  
+        // Testing Purposes - getting to the last question immediatley
+        //this.currentQuestionIndex = this.questions.length - 1;
       }
     });
   }
@@ -69,17 +75,35 @@ export class QuizComponent implements OnInit {
     this.selectionLocked = true;  // Lock selection after an option is selected
   }
 
-  // Proceed to the next question
+  // Proceed to the next question or show results if the quiz is completed
   nextQuestion(): void {
+    if (this.selectedOption === this.correctAnswer) {
+      this.correctAnswersCount++;  // Increment correct answers count if the user answered correctly
+    }
+
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
       this.selectedOption = '';  // Reset selected option
       this.loadOptions();  // Load new options for the next question
+    } else {
+      this.showResults();  // Show results when the quiz ends
     }
   }
 
   // Check if the selected option is correct
   isCorrect(): boolean {
     return this.selectedOption === this.correctAnswer;
+  }
+
+  // Display the results modal
+  async showResults(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: QuizResultsComponent,
+      componentProps: {
+        correctAnswers: this.correctAnswersCount,
+        totalQuestions: this.questions.length
+      }
+    });
+    await modal.present();
   }
 }
