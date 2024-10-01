@@ -12,10 +12,12 @@ const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 })
 export class ConfigService {
 
+  // Get the list of courses
   getCourses(): Observable<Course[]> {
     return from(this.fetchCoursesFromSupabase());
   }
 
+  // Fetch courses from Supabase
   private async fetchCoursesFromSupabase(): Promise<Course[]> {
     const { data: courses, error } = await supabase
       .from('courses')
@@ -52,7 +54,7 @@ export class ConfigService {
     }));
   }
 
-  // Method to generate quiz data by randomizing options and including correct/incorrect answers
+  // Generate quiz questions with shuffled options
   private generateQuizQuestions(questions: { question: string, answer: string }[]): { question: string, options: string[], answer: string }[] {
     return questions.map(questionItem => {
       const correctAnswer = questionItem.answer;
@@ -94,9 +96,8 @@ export class ConfigService {
     console.log('Question added:', data);
   }
 
-  // Add a method to create a new course with the first question and answer
+  // Create a new course
   async createNewCourse(courseName: string, description: string): Promise<void> {
-    // Insert a new course with name and description
     const { data: courseData, error: courseError } = await supabase
       .from('courses')
       .insert([{ name: courseName, description }])
@@ -109,71 +110,108 @@ export class ConfigService {
     console.log('New course added:', courseData);
   }
 
-  // Update streak in Supabase
- async updateStreak(userId: string): Promise<void> {
-  const localToday = new Date().toLocaleDateString('en-CA'); // User's local date in YYYY-MM-DD format
+  // Update streak and personal best in Supabase
+  async updateStreak(userId: string): Promise<number> {
+    const localToday = new Date().toLocaleDateString('en-CA'); // User's local date in YYYY-MM-DD format
 
-  // Check if the user already has a streak record
-  const { data: userStreakData, error } = await supabase
-    .from('user_streaks')
-    .select('last_streak_update, streak')
-    .eq('user_id', userId)
-    .single();
+    // Fetch current streak and personal best
+    const { data: userStreakData, error } = await supabase
+      .from('user_streaks')
+      .select('last_streak_update, streak, personal_best')
+      .eq('user_id', userId)
+      .single();
 
-  if (error) {
-    if (error.code !== 'PGRST116') {
+    if (error && error.code !== 'PGRST116') {
       console.error('Error fetching streak:', error);
-      return;
+      return 0;  // Return a default value if there is an error
     }
-    // If error code 'PGRST116', this means no existing record for the user, so we proceed to create a new one
-    console.log('No existing streak record found for user, creating a new entry.');
-  }
 
-  // Check if the streak has already been updated today
-  if (userStreakData && userStreakData.last_streak_update === localToday) {
+    if (userStreakData && userStreakData.last_streak_update === localToday) {
       console.log('Streak already updated today, no changes made');
-      return;  // Exit the function since the streak has already been updated today
-  }
-
-  let newStreak = 1; // Default streak for a new record
-  if (userStreakData) {
-    const lastLoginDate = new Date(userStreakData.last_streak_update).toLocaleDateString('en-CA');
-
-    // If the last update was yesterday, increment the streak
-    if (new Date(localToday).getTime() - new Date(lastLoginDate).getTime() === 86400000) {
-      newStreak = userStreakData.streak + 1; // Increment streak if consecutive day
+      return userStreakData.streak;  // Return the current streak if already updated
     }
+
+    let newStreak = 1; // Default streak for a new record
+    let personalBest = userStreakData?.personal_best || 0;
+
+    if (userStreakData) {
+      const lastLoginDate = new Date(userStreakData.last_streak_update).toLocaleDateString('en-CA');
+
+      if (new Date(localToday).getTime() - new Date(lastLoginDate).getTime() === 86400000) {
+        newStreak = userStreakData.streak + 1; // Increment streak if consecutive day
+      } else if (new Date(localToday).getTime() - new Date(lastLoginDate).getTime() > 86400000) {
+        newStreak = 1; // Reset streak to 1 if missed more than a day
+      }
+
+      // Check if the current streak exceeds the personal best
+      if (newStreak > personalBest) {
+        personalBest = newStreak;
+      }
+    }
+
+    // Log to confirm correct values before updating
+    console.log(`Updating user ${userId} with streak: ${newStreak}, personal best: ${personalBest}`);
+
+    // Upsert data into the Supabase table
+    const { error: upsertError } = await supabase
+      .from('user_streaks')
+      .upsert({
+        user_id: userId,
+        streak: newStreak,
+        personal_best: personalBest, // Ensure personal best is being updated
+        last_streak_update: localToday
+      }, { onConflict: 'user_id' });
+
+    if (upsertError) {
+      console.error('Error updating streak and personal best:', upsertError);
+      return 0;  // Return a default value if there is an error updating
+    }
+
+    console.log(`Streak updated successfully. Current streak: ${newStreak}, Personal best: ${personalBest}`);
+    return newStreak;  // Return the updated streak
   }
 
-  // Upsert (insert or update) streak data with the local time
-  const { error: upsertError } = await supabase
-    .from('user_streaks')
-    .upsert({
-      user_id: userId,
-      streak: newStreak,
-      last_streak_update: localToday // Store the local date
-    });
+  // Retrieve the personal best streak for a user
+  async getPersonalBest(userId: string): Promise<number> {
+    const { data, error } = await supabase
+      .from('user_streaks')
+      .select('personal_best')
+      .eq('user_id', userId)
+      .single();
 
-  if (upsertError) {
-    console.error('Error updating streak:', upsertError);
-  } else {
-    console.log(`Streak updated successfully. Current streak: ${newStreak}`);
-  }
-}
+    if (error) {
+      console.error('Error fetching personal best:', error);
+      return 0;
+    }
 
-// Retrieve the current streak for a user
-async getStreak(userId: string): Promise<number> {
-  const { data, error } = await supabase
-    .from('user_streaks')
-    .select('streak')
-    .eq('user_id', userId)
-    .single();
-
-  if (error && error.code !== 'PGRST116') {
-    console.error('Error fetching streak:', error);
-    return 0;
+    return data?.personal_best || 0;
   }
 
-  return data?.streak || 0;
-}
+  // Retrieve the current streak for a user
+  async getStreak(userId: string): Promise<number> {
+    const { data, error } = await supabase
+      .from('user_streaks')
+      .select('streak')
+      .eq('user_id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching streak:', error);
+      return 0;
+    }
+
+    return data?.streak ?? 0;
+  }
+
+  // Get hardcoded leaderboard data for testing
+  async getLeaderboard(): Promise<{ username: string, correctAnswers: number }[]> {
+    // Return some hardcoded data for testing purposes
+    return [
+      { username: 'User1', correctAnswers: 15 },
+      { username: 'User2', correctAnswers: 20 },
+      { username: 'User3', correctAnswers: 12 },
+      { username: 'User4', correctAnswers: 18 },
+      { username: 'User5', correctAnswers: 25 }
+    ];
+  }
 }

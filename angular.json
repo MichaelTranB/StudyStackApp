@@ -34,7 +34,8 @@
             "styles": ["src/global.scss", "src/theme/variables.scss"],
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "ws"
+              "ws",
+              "canvas-confetti"
             ]
           },
           "configurations": {
