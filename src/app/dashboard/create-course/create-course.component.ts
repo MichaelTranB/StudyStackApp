@@ -8,7 +8,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   templateUrl: './create-course.component.html',
   styleUrls: ['./create-course.component.scss'],
 })
-
 export class CreateCourseComponent {
   createCourseForm: FormGroup;
 
@@ -19,7 +18,7 @@ export class CreateCourseComponent {
   ) {
     this.createCourseForm = this.formBuilder.group({
       courseName: ['', Validators.required],
-      newDescription: ['', Validators.required], // Ensure you are capturing the description
+      newDescription: ['', Validators.required],
     });
   }
 
@@ -34,7 +33,7 @@ export class CreateCourseComponent {
       this.configService.createNewCourse(courseName, newDescription)
         .then(() => {
           console.log('Course created successfully.');
-          this.dismiss(); // Close the modal upon success
+          this.dismiss();
         })
         .catch(err => {
           console.error('Error creating course:', err);

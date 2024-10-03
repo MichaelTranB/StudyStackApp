@@ -3,11 +3,12 @@ export const environment = {
   googleMapsAPIKey: 'AIzaSyDJQ8GV3fj3J0ZOelURPcyRHnEau7E2Byc',
   firebase: {
     apiKey: "AIzaSyCI-J4BDzwkN_TgLquzABbyIMWh--C5_lE",
-    authDomain: "your-auth-domain",
-    projectId: "your-project-id",
-    storageBucket: "your-storage-bucket",
-    messagingSenderId: "your-messaging-sender-id",
-    appId: "your-app-id",
-    measurementId: "your-measurement-id"
+    authDomain: "bookings-abeec.firebaseapp.com",
+    databaseURL: "https://bookings-abeec-default-rtdb.firebaseio.com",
+    projectId: "bookings-abeec",
+    storageBucket: "bookings-abeec.appspot.com",
+    messagingSenderId: "1020345970274",
+    appId: "1:1020345970274:web:5c9db56d14cbd8750f6b3b",
+    measurementId: "G-TVR49T8XMK"
   }
 };

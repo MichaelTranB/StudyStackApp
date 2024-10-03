@@ -36,6 +36,7 @@
     "canvas-confetti": "^1.9.3",
     "chart.js": "^3.7.0",
     "firebase": "^10.13.2",
+    "howler": "^2.2.4",
     "ionicons": "^7.0.0",
     "ng2-charts": "^4.0.0",
     "pillow": "^0.0.9",

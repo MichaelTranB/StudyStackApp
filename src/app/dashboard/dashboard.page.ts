@@ -3,8 +3,9 @@ import { Router } from '@angular/router';
 import { ConfigService } from '../config.service';
 import { Course } from '../shared/models/course.model';
 import { EditCourseComponent } from './edit-course/edit-course.component';
-import { CreateCourseComponent } from './create-course/create-course.component'; // Import CreateCourseComponent
+import { CreateCourseComponent } from './create-course/create-course.component'; 
 import { ModalController } from '@ionic/angular';
+import { AccountService } from '../places/account/account.service'; // Import AccountService
 
 @Component({
   selector: 'app-dashboard',
@@ -13,11 +14,13 @@ import { ModalController } from '@ionic/angular';
 })
 export class DashboardPage implements OnInit {
   courses: Course[] = [];
+  userRole: string = 'user';  // Default role is 'user'
 
   constructor(
     private configService: ConfigService,
     private router: Router,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private accountService: AccountService  // Inject AccountService
   ) {}
 
   async openEditCourseModal() {
@@ -40,13 +43,16 @@ export class DashboardPage implements OnInit {
   }
 
   ngOnInit() {
-    this.configService.getCourses().subscribe(courses => {
-      if (courses.length > 0) {
-        this.courses = courses;
-      } else {
-        console.error('No courses found.');
+    // Update existing accounts with the role field
+    this.accountService.updateRoleForExistingAccounts();
+
+    this.accountService.account.subscribe(accounts => {
+      if (accounts.length > 0) {
+        this.userRole = accounts[0].role;  // Set the user's role
       }
     });
+
+    this.loadCourses();
   }
 
   loadCourses() {
@@ -59,16 +65,13 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  // Navigation to flashcard
   goToFlashcard(mode: string, courseId: string) {
     this.router.navigate(['/flashcard', mode, courseId]);
   }
 
-  // Navigation to quiz
   goToQuiz(courseId: string) {
     this.router.navigate(['/quiz', courseId]);
   }
-
 
   logout() {
     console.log('Logout button clicked');

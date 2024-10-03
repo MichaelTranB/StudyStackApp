@@ -49,6 +49,12 @@ export class AuthService implements OnDestroy {
     );
   }
 
+  get role() {
+    return this._user.asObservable().pipe(
+      map((user) => (user ? user.role : 'user'))
+    );
+  }
+
   autoLogin() {
     const storedData = localStorage.getItem('authData');
     if (!storedData) return of(false);
@@ -58,6 +64,7 @@ export class AuthService implements OnDestroy {
       tokenExpirationDate: string;
       userId: string;
       email: string;
+      role: string;
     };
 
     const expirationTime = new Date(parsedData.tokenExpirationDate);
@@ -67,11 +74,12 @@ export class AuthService implements OnDestroy {
       parsedData.userId,
       parsedData.email,
       parsedData.token,
-      expirationTime
+      expirationTime,
+      parsedData.role
     );
     this._user.next(user);
     this.autoLogout(user.tokenDuration);
-    this.configService.updateStreak(user.id); // Update streak upon auto-login
+    this.configService.updateStreak(user.id);
 
     return of(true);
   }
@@ -94,7 +102,7 @@ export class AuthService implements OnDestroy {
       .pipe(
         tap((userData) => {
           this.setUserData(userData);
-          this.configService.updateStreak(userData.localId); // Update streak upon login
+          this.configService.updateStreak(userData.localId);
         })
       );
   }
@@ -108,12 +116,21 @@ export class AuthService implements OnDestroy {
         }
 
         const token = await result.user.getIdToken();
+        const tokenResult = await result.user.getIdTokenResult();
+        const role = tokenResult.claims['role'] || 'user';  // Fetch role or set to 'user'
         const expirationTime = new Date(new Date().getTime() + 3600 * 1000);
-        const user = new User(result.user.uid!, result.user.email!, token, expirationTime);
+
+        const user = new User(
+          result.user.uid!,
+          result.user.email!,
+          token,
+          expirationTime,
+          role
+        );
         this._user.next(user);
-        this.storeAuthData(user.id, token, expirationTime.toISOString(), user.email!);
+        this.storeAuthData(user.id, token, expirationTime.toISOString(), user.email!, role);
         this.autoLogout(user.tokenDuration);
-        this.configService.updateStreak(user.id); // Update streak after Google login
+        this.configService.updateStreak(user.id);
         return user;
       })
     );
@@ -131,11 +148,13 @@ export class AuthService implements OnDestroy {
     const expirationTime = new Date(
       new Date().getTime() + +userData.expiresIn * 1000
     );
+    const role = 'user'; // Default role for newly registered users
     const user = new User(
       userData.localId,
       userData.email,
       userData.idToken,
-      expirationTime
+      expirationTime,
+      role
     );
     this._user.next(user);
     this.autoLogout(user.tokenDuration);
@@ -143,7 +162,8 @@ export class AuthService implements OnDestroy {
       userData.localId,
       userData.idToken,
       expirationTime.toISOString(),
-      userData.email
+      userData.email,
+      role
     );
   }
 
@@ -151,9 +171,10 @@ export class AuthService implements OnDestroy {
     userId: string,
     token: string,
     tokenExpirationDate: string,
-    email: string
+    email: string,
+    role: string  // Store the role
   ) {
-    const data = JSON.stringify({ userId, token, tokenExpirationDate, email });
+    const data = JSON.stringify({ userId, token, tokenExpirationDate, email, role });
     localStorage.setItem('authData', data);
   }
 

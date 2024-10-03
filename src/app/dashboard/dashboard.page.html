@@ -1,9 +1,9 @@
 <ion-header [translucent]="true"></ion-header>
 <ion-toolbar>
-  <ion-title>Dashboard</ion-title>
+  <ion-title>Dashboard</ion-title> 
   <ion-buttons slot="end">
-    <ion-button (click)="openCreateCourseModal()">Create Course</ion-button>
-    <ion-button (click)="openEditCourseModal()">Edit Course</ion-button>
+    <ion-button *ngIf="userRole === 'admin'" (click)="openCreateCourseModal()">Create Course</ion-button>
+    <ion-button *ngIf="userRole === 'admin'" (click)="openEditCourseModal()">Edit Course</ion-button>
     <ion-button (click)="logout()">LOGOUT</ion-button>
   </ion-buttons>
 </ion-toolbar>

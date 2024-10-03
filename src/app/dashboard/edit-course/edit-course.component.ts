@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { ConfigService } from '../../config.service';  
 import { Course } from '../../shared/models/course.model';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';  // Import FormBuilder and FormGroup
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-edit-course',
@@ -11,14 +11,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';  // Import 
 })
 export class EditCourseComponent implements OnInit {
   courses: Course[] = [];
-  editCourseForm: FormGroup;  // Form group to manage the form inputs
+  editCourseForm: FormGroup;
 
   constructor(
     private modalController: ModalController,
     private configService: ConfigService,
-    private formBuilder: FormBuilder  // Inject FormBuilder
+    private formBuilder: FormBuilder
   ) {
-    // Initialize the form with validators
     this.editCourseForm = this.formBuilder.group({
       selectedCourseId: ['', Validators.required],
       newQuestion: ['', Validators.required],
@@ -42,7 +41,7 @@ export class EditCourseComponent implements OnInit {
 
   addQuestionAndAnswer() {
     if (this.editCourseForm.valid) {
-      const courseId = parseInt(this.editCourseForm.value.selectedCourseId, 10);  // Convert to number
+      const courseId = parseInt(this.editCourseForm.value.selectedCourseId, 10);
       const { newQuestion, newAnswer } = this.editCourseForm.value;
 
       this.configService.addQuestionToCourse(courseId, newQuestion, newAnswer)
