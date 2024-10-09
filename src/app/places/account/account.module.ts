@@ -8,7 +8,6 @@ import { AccountPage } from './account.page';
 import { ProfilePictureComponent } from 'src/app/places/account/profile-picture/profile-picture.component';
 import { ProfileListComponent } from 'src/app/places/account/profile-list/profile-list.component'
 import { EditNameComponent,NameModalContent } from 'src/app/places/account/edit-name/edit-name.component';
-import { EditNumberComponent,NumberModalContent } from 'src/app/places/account/edit-number/edit-number.component';
 
 @NgModule({
   imports: [
@@ -17,8 +16,8 @@ import { EditNumberComponent,NumberModalContent } from 'src/app/places/account/e
     IonicModule,
     AccountPageRoutingModule
   ],
-  declarations: [AccountPage, ProfilePictureComponent, ProfileListComponent, EditNameComponent,NameModalContent, EditNumberComponent, NumberModalContent],
-  exports: [ProfilePictureComponent, ProfileListComponent, EditNameComponent,  EditNumberComponent]
+  declarations: [AccountPage, ProfilePictureComponent, ProfileListComponent, EditNameComponent,NameModalContent],
+  exports: [ProfilePictureComponent, ProfileListComponent, EditNameComponent]
   
 })
 export class AccountPageModule {}

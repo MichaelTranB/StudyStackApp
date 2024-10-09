@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, from, of } from 'rxjs';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { map, tap, switchMap, take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { User } from './user.model';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
@@ -65,6 +65,8 @@ export class AuthService implements OnDestroy {
       userId: string;
       email: string;
       role: string;
+      firstName: string;
+      lastName: string;
     };
 
     const expirationTime = new Date(parsedData.tokenExpirationDate);
@@ -72,6 +74,8 @@ export class AuthService implements OnDestroy {
 
     const user = new User(
       parsedData.userId,
+      parsedData.firstName,
+      parsedData.lastName,
       parsedData.email,
       parsedData.token,
       expirationTime,
@@ -84,13 +88,58 @@ export class AuthService implements OnDestroy {
     return of(true);
   }
 
-  signup(email: string, password: string) {
+  signup(email: string, password: string, firstName: string, lastName: string, role: string = 'user') {
     return this.http
       .post<AuthResponseData>(
         `https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=${environment.firebase.apiKey}`,
         { email, password, returnSecureToken: true }
       )
-      .pipe(tap(this.setUserData.bind(this)));
+      .pipe(
+        switchMap((resData: AuthResponseData) => {
+          const expirationTime = new Date(new Date().getTime() + +resData.expiresIn * 1000);
+          const user = new User(
+            resData.localId,
+            firstName,
+            lastName,
+            resData.email,
+            resData.idToken,
+            expirationTime,
+            role
+          );
+          this._user.next(user);
+
+          // Write user data into the Realtime Database
+          return this.token.pipe(
+            take(1),
+            switchMap(token => {
+              const accountData = {
+                email,
+                firstName,
+                lastName,
+                role,
+                userId: resData.localId
+              };
+
+              return this.http.put<any>(
+                `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/${resData.localId}.json?auth=${token}`,
+                accountData
+              );
+            })
+          );
+        }),
+        // After signup, store data in localStorage
+        tap((resData) => {
+          this.storeAuthData(
+            resData.localId,
+            resData.idToken,
+            new Date(new Date().getTime() + +resData.expiresIn * 1000).toISOString(),
+            email,
+            firstName,
+            lastName,
+            role
+          );
+        })
+      );
   }
 
   login(email: string, password: string) {
@@ -107,6 +156,23 @@ export class AuthService implements OnDestroy {
       );
   }
 
+  private saveUserToDatabase(userId: string, email: string, firstName: string, lastName: string) {
+    const userData = {
+      email,
+      firstName,
+      lastName,
+      userId,
+    };
+    this.http
+      .put(
+        `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/${userId}.json`,
+        userData
+      )
+      .subscribe(() => {
+        console.log('User saved to Realtime Database');
+      });
+  }
+
   loginWithGoogle() {
     const provider = new GoogleAuthProvider();
     return from(this.afAuth.signInWithPopup(provider)).pipe(
@@ -117,18 +183,31 @@ export class AuthService implements OnDestroy {
 
         const token = await result.user.getIdToken();
         const tokenResult = await result.user.getIdTokenResult();
-        const role = tokenResult.claims['role'] || 'user';  // Fetch role or set to 'user'
+        const role = tokenResult.claims['role'] || 'user';  
         const expirationTime = new Date(new Date().getTime() + 3600 * 1000);
+
+        const displayName = result.user.displayName || '';
+        const [firstName, lastName] = displayName.split(' ');  
 
         const user = new User(
           result.user.uid!,
+          firstName || 'FirstName',  
+          lastName || 'LastName',    
           result.user.email!,
           token,
           expirationTime,
           role
         );
         this._user.next(user);
-        this.storeAuthData(user.id, token, expirationTime.toISOString(), user.email!, role);
+        this.storeAuthData(
+          user.id, 
+          token, 
+          expirationTime.toISOString(), 
+          user.email!, 
+          role, 
+          firstName, 
+          lastName
+        );
         this.autoLogout(user.tokenDuration);
         this.configService.updateStreak(user.id);
         return user;
@@ -148,9 +227,11 @@ export class AuthService implements OnDestroy {
     const expirationTime = new Date(
       new Date().getTime() + +userData.expiresIn * 1000
     );
-    const role = 'user'; // Default role for newly registered users
+    const role = 'user'; 
     const user = new User(
       userData.localId,
+      'FirstName',  
+      'LastName',   
       userData.email,
       userData.idToken,
       expirationTime,
@@ -163,7 +244,9 @@ export class AuthService implements OnDestroy {
       userData.idToken,
       expirationTime.toISOString(),
       userData.email,
-      role
+      role,
+      'FirstName',  
+      'LastName'    
     );
   }
 
@@ -172,9 +255,11 @@ export class AuthService implements OnDestroy {
     token: string,
     tokenExpirationDate: string,
     email: string,
-    role: string  // Store the role
+    role: string,
+    firstName: string,
+    lastName: string
   ) {
-    const data = JSON.stringify({ userId, token, tokenExpirationDate, email, role });
+    const data = JSON.stringify({ userId, token, tokenExpirationDate, email, role, firstName, lastName });
     localStorage.setItem('authData', data);
   }
 
