@@ -96,7 +96,10 @@ export class AuthService implements OnDestroy {
       )
       .pipe(
         switchMap((resData: AuthResponseData) => {
-          const expirationTime = new Date(new Date().getTime() + +resData.expiresIn * 1000);
+          // Check if resData.expiresIn is defined and valid
+          const expiresIn = +resData.expiresIn || 3600; // Default to 1 hour if undefined
+          const expirationTime = new Date(new Date().getTime() + expiresIn * 1000);
+  
           const user = new User(
             resData.localId,
             firstName,
@@ -107,7 +110,7 @@ export class AuthService implements OnDestroy {
             role
           );
           this._user.next(user);
-
+  
           // Write user data into the Realtime Database
           return this.token.pipe(
             take(1),
@@ -119,7 +122,7 @@ export class AuthService implements OnDestroy {
                 role,
                 userId: resData.localId
               };
-
+  
               return this.http.put<any>(
                 `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/${resData.localId}.json?auth=${token}`,
                 accountData
@@ -129,10 +132,11 @@ export class AuthService implements OnDestroy {
         }),
         // After signup, store data in localStorage
         tap((resData) => {
+          const expiresIn = +resData.expiresIn || 3600; // Ensure default expiration
           this.storeAuthData(
             resData.localId,
             resData.idToken,
-            new Date(new Date().getTime() + +resData.expiresIn * 1000).toISOString(),
+            new Date(new Date().getTime() + expiresIn * 1000).toISOString(),
             email,
             firstName,
             lastName,
@@ -141,6 +145,7 @@ export class AuthService implements OnDestroy {
         })
       );
   }
+  
 
   login(email: string, password: string) {
     return this.http
@@ -150,7 +155,31 @@ export class AuthService implements OnDestroy {
       )
       .pipe(
         tap((userData) => {
-          this.setUserData(userData);
+          // Ensure expiresIn is valid, default to 1 hour if it's undefined
+          const expiresIn = +userData.expiresIn || 3600;
+          const expirationTime = new Date(new Date().getTime() + expiresIn * 1000);
+  
+          const user = new User(
+            userData.localId,
+            'FirstName', // Replace with proper logic if needed
+            'LastName',  // Replace with proper logic if needed
+            userData.email,
+            userData.idToken,
+            expirationTime,
+            'user' // Default role
+          );
+  
+          this._user.next(user);
+          this.storeAuthData(
+            userData.localId,
+            userData.idToken,
+            expirationTime.toISOString(),
+            userData.email,
+            'FirstName',
+            'LastName',
+            'user'
+          );
+          this.autoLogout(user.tokenDuration);
           this.configService.updateStreak(userData.localId);
         })
       );

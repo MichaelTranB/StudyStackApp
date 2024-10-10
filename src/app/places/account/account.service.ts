@@ -35,10 +35,9 @@ export class AccountService {
         const accounts: Account[] = [];
         for (const key in accountData) {
           if (accountData.hasOwnProperty(key)) {
-            // Ensure items is an array
             const itemsArray = Array.isArray(accountData[key].items) ? accountData[key].items : [];
             const role = accountData[key].role || 'user'; // Default to 'user' if role is missing
-
+  
             accounts.push(
               new Account(
                 key,
@@ -59,6 +58,7 @@ export class AccountService {
       })
     );
   }
+  
 
   updateAccountDetails(userId: string, firstName: string, lastName: string, email: string, role: string = 'user') {
     const updateData = {

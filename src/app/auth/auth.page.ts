@@ -21,25 +21,18 @@ export class AuthPage {
     private alertCtrl: AlertController
   ) {}
 
-  authenticate(form: NgForm) {
+  authenticate(form: NgForm, email: string, password: string) {
     this.isLoading = true;
     this.loadingCtrl
       .create({ keyboardClose: true, message: 'Logging in...' })
       .then(loadingEl => {
         loadingEl.present();
         let authObs: Observable<AuthResponseData>;
-
-        const email = form.value.email;
-        const password = form.value.password;
-
         if (this.isLogin) {
           authObs = this.authService.login(email, password);
         } else {
-          const firstName = form.value.firstName;
-          const lastName = form.value.lastName;
-          authObs = this.authService.signup(email, password, firstName, lastName);
+          authObs = this.authService.signup(email, password, form.value.firstName, form.value.lastName);
         }
-
         authObs.subscribe(
           resData => {
             this.isLoading = false;
@@ -49,20 +42,30 @@ export class AuthPage {
           errRes => {
             this.isLoading = false;
             loadingEl.dismiss();
-            const errorMessage = errRes?.error?.error?.message || 'Could not sign you up, please try again.';
+  
+            // Check if the structure contains the error message, and handle it gracefully
             let message = 'Could not sign you up, please try again.';
-            if (errorMessage === 'EMAIL_EXISTS') {
-              message = 'This email address exists already!';
-            } else if (errorMessage === 'EMAIL_NOT_FOUND') {
-              message = 'E-Mail address could not be found.';
-            } else if (errorMessage === 'INVALID_PASSWORD') {
-              message = 'This password is not correct.';
+            
+            if (errRes && errRes.error && errRes.error.error) {
+              const code = errRes.error.error.message;
+  
+              if (code === 'EMAIL_EXISTS') {
+                message = 'This email address exists already!';
+              } else if (code === 'EMAIL_NOT_FOUND') {
+                message = 'E-Mail address could not be found.';
+              } else if (code === 'INVALID_PASSWORD') {
+                message = 'This password is not correct.';
+              }
+            } else {
+              // Handle other cases where errRes might not have an error structure
+              message = errRes.message || 'An unknown error occurred!';
             }
             this.showAlert(message);
           }
         );
       });
   }
+  
 
   onSwitchAuthMode() {
     this.isLogin = !this.isLogin;
@@ -72,7 +75,11 @@ export class AuthPage {
     if (!form.valid) {
       return;
     }
-    this.authenticate(form);
+    const email = form.value.email;
+    const password = form.value.password;
+  
+    // Use the authenticate method, which already handles login/signup
+    this.authenticate(form, email, password);
     form.reset();
   }
 
