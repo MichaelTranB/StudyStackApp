@@ -28,11 +28,17 @@ export class AuthPage {
       .then(loadingEl => {
         loadingEl.present();
         let authObs: Observable<AuthResponseData>;
+  
         if (this.isLogin) {
           authObs = this.authService.login(email, password);
         } else {
+          // Log the firstName and lastName values
+          console.log('First Name:', form.value.firstName);
+          console.log('Last Name:', form.value.lastName);
+          
           authObs = this.authService.signup(email, password, form.value.firstName, form.value.lastName);
         }
+  
         authObs.subscribe(
           resData => {
             this.isLoading = false;
@@ -64,8 +70,7 @@ export class AuthPage {
           }
         );
       });
-  }
-  
+  }  
 
   onSwitchAuthMode() {
     this.isLogin = !this.isLogin;

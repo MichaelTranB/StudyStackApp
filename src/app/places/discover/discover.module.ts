@@ -1,10 +1,12 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Routes, RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
-import { ScrollingModule } from '@angular/cdk/scrolling'; // Correct import path
 import { DiscoverPage } from './discover.page';
-import { RouterModule, Routes } from '@angular/router';
+import { CategoriesComponent } from './categories/categories.component';
+import { DisplayAllComponent } from './display-all/display-all.component';
+import { CoursePopupComponent } from './course-popup/course-popup.component';
 
 const routes: Routes = [
   {
@@ -18,10 +20,9 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     IonicModule,
-    RouterModule.forChild(routes),
-    ScrollingModule // Add ScrollingModule here
+    RouterModule.forChild(routes)
   ],
-  declarations: [DiscoverPage],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  declarations: [DiscoverPage, CategoriesComponent, DisplayAllComponent, CoursePopupComponent]
 })
 export class DiscoverPageModule {}

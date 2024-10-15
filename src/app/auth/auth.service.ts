@@ -89,6 +89,7 @@ export class AuthService implements OnDestroy {
   }
 
   signup(email: string, password: string, firstName: string, lastName: string, role: string = 'user') {
+    console.log('Signup started'); // Log start of signup process
     return this.http
       .post<AuthResponseData>(
         `https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=${environment.firebase.apiKey}`,
@@ -109,6 +110,9 @@ export class AuthService implements OnDestroy {
             expirationTime,
             role
           );
+  
+          console.log('User created:', user); // Log user data
+  
           this._user.next(user);
   
           // Write user data into the Realtime Database
@@ -122,6 +126,8 @@ export class AuthService implements OnDestroy {
                 role,
                 userId: resData.localId
               };
+  
+              console.log('Data to be saved to Realtime Database:', accountData); // Log data being written
   
               return this.http.put<any>(
                 `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/${resData.localId}.json?auth=${token}`,
@@ -142,9 +148,11 @@ export class AuthService implements OnDestroy {
             lastName,
             role
           );
+          console.log('Data successfully stored in localStorage'); // Log success
         })
       );
   }
+  
   
 
   login(email: string, password: string) {

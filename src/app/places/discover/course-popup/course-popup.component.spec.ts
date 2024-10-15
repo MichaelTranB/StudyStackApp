@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { CategoriesComponent } from './categories.component';
+import { CoursePopupComponent } from './course-popup.component';
 
-describe('CategoriesComponent', () => {
-  let component: CategoriesComponent;
-  let fixture: ComponentFixture<CategoriesComponent>;
+describe('CoursePopupComponent', () => {
+  let component: CoursePopupComponent;
+  let fixture: ComponentFixture<CoursePopupComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ CategoriesComponent ],
+      declarations: [ CoursePopupComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CategoriesComponent);
+    fixture = TestBed.createComponent(CoursePopupComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
