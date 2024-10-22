@@ -1,11 +1,11 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, from, of } from 'rxjs';
-import { map, tap, switchMap, take } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
-import { User } from './user.model';
+import { BehaviorSubject, from, of, Observable } from 'rxjs';
+import { map, tap, switchMap } from 'rxjs/operators';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { GoogleAuthProvider } from 'firebase/auth';
+import { User } from './user.model';
 import { ConfigService } from '../config.service';
 
 export interface AuthResponseData {
@@ -28,34 +28,27 @@ export class AuthService implements OnDestroy {
   constructor(
     private http: HttpClient,
     private afAuth: AngularFireAuth,
+    private firestore: AngularFirestore,
     private configService: ConfigService
   ) {}
 
-  get userIsAuthenticated() {
-    return this._user.asObservable().pipe(
-      map((user) => (user ? !!user.token : false))
-    );
+  get userIsAuthenticated(): Observable<boolean> {
+    return this._user.asObservable().pipe(map((user) => !!user?.token));
   }
 
-  get userId() {
-    return this._user.asObservable().pipe(
-      map((user) => (user ? user.id : null))
-    );
+  get userId(): Observable<string | null> {
+    return this._user.asObservable().pipe(map((user) => user?.id || null));
   }
 
-  get token() {
-    return this._user.asObservable().pipe(
-      map((user) => (user ? user.token : null))
-    );
+  get token(): Observable<string | null> {
+    return this._user.asObservable().pipe(map((user) => user?.token || null));
   }
 
-  get role() {
-    return this._user.asObservable().pipe(
-      map((user) => (user ? user.role : 'user'))
-    );
+  get role(): Observable<string> {
+    return this._user.asObservable().pipe(map((user) => user?.role || 'user'));
   }
 
-  autoLogin() {
+  autoLogin(): Observable<boolean> {
     const storedData = localStorage.getItem('authData');
     if (!storedData) return of(false);
 
@@ -81,6 +74,7 @@ export class AuthService implements OnDestroy {
       expirationTime,
       parsedData.role
     );
+
     this._user.next(user);
     this.autoLogout(user.tokenDuration);
     this.configService.updateStreak(user.id);
@@ -88,230 +82,125 @@ export class AuthService implements OnDestroy {
     return of(true);
   }
 
-  signup(email: string, password: string, firstName: string, lastName: string, role: string = 'user') {
-    console.log('Signup started'); // Log start of signup process
-    return this.http
-      .post<AuthResponseData>(
-        `https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=${environment.firebase.apiKey}`,
-        { email, password, returnSecureToken: true }
-      )
-      .pipe(
-        switchMap((resData: AuthResponseData) => {
-          // Check if resData.expiresIn is defined and valid
-          const expiresIn = +resData.expiresIn || 3600; // Default to 1 hour if undefined
-          const expirationTime = new Date(new Date().getTime() + expiresIn * 1000);
-  
-          const user = new User(
-            resData.localId,
-            firstName,
-            lastName,
-            resData.email,
-            resData.idToken,
-            expirationTime,
-            role
-          );
-  
-          console.log('User created:', user); // Log user data
-  
-          this._user.next(user);
-  
-          // Write user data into the Realtime Database
-          return this.token.pipe(
-            take(1),
-            switchMap(token => {
-              const accountData = {
-                email,
-                firstName,
-                lastName,
-                role,
-                userId: resData.localId
-              };
-  
-              console.log('Data to be saved to Realtime Database:', accountData); // Log data being written
-  
-              return this.http.put<any>(
-                `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/${resData.localId}.json?auth=${token}`,
-                accountData
-              );
-            })
-          );
-        }),
-        // After signup, store data in localStorage
-        tap((resData) => {
-          const expiresIn = +resData.expiresIn || 3600; // Ensure default expiration
-          this.storeAuthData(
-            resData.localId,
-            resData.idToken,
-            new Date(new Date().getTime() + expiresIn * 1000).toISOString(),
-            email,
-            firstName,
-            lastName,
-            role
-          );
-          console.log('Data successfully stored in localStorage'); // Log success
-        })
-      );
-  }
-  
-  
+  signup(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    role: string = 'user'
+  ): Observable<{ [key: string]: any }> {
+    console.log('Signup input:', { firstName, lastName });
 
-  login(email: string, password: string) {
-    return this.http
-      .post<AuthResponseData>(
-        `https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=${environment.firebase.apiKey}`,
-        { email, password, returnSecureToken: true }
-      )
-      .pipe(
-        tap((userData) => {
-          // Ensure expiresIn is valid, default to 1 hour if it's undefined
-          const expiresIn = +userData.expiresIn || 3600;
-          const expirationTime = new Date(new Date().getTime() + expiresIn * 1000);
-  
-          const user = new User(
-            userData.localId,
-            'FirstName', // Replace with proper logic if needed
-            'LastName',  // Replace with proper logic if needed
-            userData.email,
-            userData.idToken,
-            expirationTime,
-            'user' // Default role
-          );
-  
-          this._user.next(user);
-          this.storeAuthData(
-            userData.localId,
-            userData.idToken,
-            expirationTime.toISOString(),
-            userData.email,
-            'FirstName',
-            'LastName',
-            'user'
-          );
-          this.autoLogout(user.tokenDuration);
-          this.configService.updateStreak(userData.localId);
-        })
-      );
-  }
+    return from(this.afAuth.createUserWithEmailAndPassword(email, password)).pipe(
+      switchMap((userCredential) => {
+        const user = userCredential.user;
+        if (!user) throw new Error('User creation failed.');
 
-  private saveUserToDatabase(userId: string, email: string, firstName: string, lastName: string) {
-    const userData = {
-      email,
-      firstName,
-      lastName,
-      userId,
-    };
-    this.http
-      .put(
-        `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/${userId}.json`,
-        userData
-      )
-      .subscribe(() => {
-        console.log('User saved to Realtime Database');
-      });
-  }
+        const userData = {
+          email: user.email || '',
+          firstName,
+          lastName,
+          role,
+          userId: user.uid,
+        };
 
-  loginWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    return from(this.afAuth.signInWithPopup(provider)).pipe(
-      switchMap(async (result) => {
-        if (!result.user) {
-          throw new Error('User not found');
-        }
-
-        const token = await result.user.getIdToken();
-        const tokenResult = await result.user.getIdTokenResult();
-        const role = tokenResult.claims['role'] || 'user';  
-        const expirationTime = new Date(new Date().getTime() + 3600 * 1000);
-
-        const displayName = result.user.displayName || '';
-        const [firstName, lastName] = displayName.split(' ');  
-
-        const user = new User(
-          result.user.uid!,
-          firstName || 'FirstName',  
-          lastName || 'LastName',    
-          result.user.email!,
-          token,
-          expirationTime,
-          role
-        );
-        this._user.next(user);
+        return this.firestore.collection('accounts').doc(user.uid).set(userData).then(() => {
+          console.log('Successfully written to Firestore:', userData);
+          return userData;
+        });
+      }),
+      tap((userData) => {
         this.storeAuthData(
-          user.id, 
-          token, 
-          expirationTime.toISOString(), 
-          user.email!, 
-          role, 
-          firstName, 
-          lastName
+          userData.userId,
+          userData.email,
+          userData.firstName,
+          userData.lastName,
+          userData.role
         );
-        this.autoLogout(user.tokenDuration);
-        this.configService.updateStreak(user.id);
-        return user;
       })
     );
   }
 
-  logout() {
-    if (this.activeLogoutTimer) {
-      clearTimeout(this.activeLogoutTimer);
-    }
+  login(email: string, password: string): Observable<{ [key: string]: any }> {
+    return from(this.afAuth.signInWithEmailAndPassword(email, password)).pipe(
+      switchMap((userCredential) => {
+        const user = userCredential.user;
+        if (!user) throw new Error('Login failed.');
+
+        return this.firestore.collection('accounts').doc(user.uid).get().pipe(
+          map((doc) => doc.data() as { [key: string]: any }),
+          tap((userData) => {
+            console.log('Retrieved User Data:', userData);
+
+            this._user.next(
+              new User(
+                user.uid,
+                userData['firstName'] || '',
+                userData['lastName'] || '',
+                user.email!,
+                '',
+                new Date(),
+                userData['role'] || 'user'
+              )
+            );
+          })
+        );
+      })
+    );
+  }
+
+  loginWithGoogle(): Observable<{ [key: string]: any }> {
+    const provider = new GoogleAuthProvider();
+    return from(this.afAuth.signInWithPopup(provider)).pipe(
+      switchMap((result) => {
+        const user = result.user;
+        if (!user) throw new Error('Google login failed.');
+
+        const userData = {
+          email: user.email || '',
+          firstName: user.displayName?.split(' ')[0] || 'FirstName',
+          lastName: user.displayName?.split(' ')[1] || 'LastName',
+          role: 'user',
+          userId: user.uid,
+        };
+
+        return this.firestore.collection('accounts').doc(user.uid).set(userData, { merge: true }).then(() => userData);
+      }),
+      tap((userData) => {
+        this.storeAuthData(
+          userData.userId,
+          userData.email,
+          userData.firstName,
+          userData.lastName,
+          userData.role
+        );
+      })
+    );
+  }
+
+  logout(): void {
+    if (this.activeLogoutTimer) clearTimeout(this.activeLogoutTimer);
     this._user.next(null);
     localStorage.removeItem('authData');
   }
 
-  private setUserData(userData: AuthResponseData) {
-    const expirationTime = new Date(
-      new Date().getTime() + +userData.expiresIn * 1000
-    );
-    const role = 'user'; 
-    const user = new User(
-      userData.localId,
-      'FirstName',  
-      'LastName',   
-      userData.email,
-      userData.idToken,
-      expirationTime,
-      role
-    );
-    this._user.next(user);
-    this.autoLogout(user.tokenDuration);
-    this.storeAuthData(
-      userData.localId,
-      userData.idToken,
-      expirationTime.toISOString(),
-      userData.email,
-      role,
-      'FirstName',  
-      'LastName'    
-    );
-  }
-
   private storeAuthData(
     userId: string,
-    token: string,
-    tokenExpirationDate: string,
     email: string,
-    role: string,
     firstName: string,
-    lastName: string
-  ) {
-    const data = JSON.stringify({ userId, token, tokenExpirationDate, email, role, firstName, lastName });
+    lastName: string,
+    role: string
+  ): void {
+    const data = JSON.stringify({ userId, email, firstName, lastName, role });
     localStorage.setItem('authData', data);
   }
 
-  private autoLogout(duration: number) {
-    if (this.activeLogoutTimer) {
-      clearTimeout(this.activeLogoutTimer);
-    }
-    this.activeLogoutTimer = setTimeout(() => {
-      this.logout();
-    }, duration);
+  private autoLogout(duration: number): void {
+    if (this.activeLogoutTimer) clearTimeout(this.activeLogoutTimer);
+    this.activeLogoutTimer = setTimeout(() => this.logout(), duration);
   }
 
-  ngOnDestroy() {
-    if (this.activeLogoutTimer) {
-      clearTimeout(this.activeLogoutTimer);
-    }
+  ngOnDestroy(): void {
+    if (this.activeLogoutTimer) clearTimeout(this.activeLogoutTimer);
   }
 }

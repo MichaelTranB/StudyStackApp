@@ -23,3 +23,6 @@ export class User {
     return this.tokenExpirationDate.getTime() - new Date().getTime();
   }
 }
+
+
+//nedgto tbe able to access name and user infromation as they navigaet the app and hsoudl eb stored in some sort fo sessionStorage,
