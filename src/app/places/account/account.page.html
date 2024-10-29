@@ -1,18 +1,24 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>account</ion-title>
+    <ion-title>Account</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">account</ion-title>
+      <ion-title size="large">Account</ion-title>
     </ion-toolbar>
   </ion-header>
+
   <div style="max-width: 600px; margin: 0 auto; padding: 16px;">
+    <!-- Profile Picture Component -->
     <app-profile-picture></app-profile-picture>
-    <app-edit-name></app-edit-name>
-    <app-profile-list></app-profile-list>
+
+    <!-- Edit Account Details Button -->
+    <ion-button expand="full" color="primary" (click)="openEditAccountModal()">
+      <ion-icon name="create-outline" slot="start"></ion-icon>
+      Edit Account Details
+    </ion-button>
   </div>
 </ion-content>

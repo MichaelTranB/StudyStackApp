@@ -24,7 +24,6 @@ export class EditCourseComponent implements OnInit {
       newAnswer: ['', Validators.required],
     });
   }
-
   ngOnInit() {
     this.loadCourses();
   }

@@ -69,7 +69,7 @@ export class AccountService {
     };
 
     return this.http.patch<{ name: string }>(
-      `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/${userId}.json`,
+      `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/{userId}.json`,
       updateData
     ).pipe(
       tap(() => {
@@ -81,14 +81,14 @@ export class AccountService {
   // Adds user and admin role fields for existing accounts in Firebase
   updateRoleForExistingAccounts() {
     this.http.get<{ [key: string]: AccountData }>(
-      `https://bookings-abeec-default-rtdb.firebaseio.com/accounts.json`
+      `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/{userId}.json`
     ).pipe(
       map(accountData => {
         for (const key in accountData) {
           if (accountData.hasOwnProperty(key) && !accountData[key].role) {
             // Set default role to 'user' if not set
             this.http.patch(
-              `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/${key}.json`,
+              `https://bookings-abeec-default-rtdb.firebaseio.com/accounts/{userId}.json`,
               { role: 'user' }
             ).subscribe();
           }
