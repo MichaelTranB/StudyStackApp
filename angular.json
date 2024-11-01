@@ -31,12 +31,7 @@
                 "output": "./svg"
               },
               {
-                "glob": "manifest.json",
-                "input": "src",
-                "output": "/"
-              },
-              {
-                "glob": "service-worker.js",
+                "glob": "**/*",
                 "input": "src",
                 "output": "/"
               }

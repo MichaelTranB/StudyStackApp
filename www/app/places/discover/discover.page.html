@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Discover Courses</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-segment (ionChange)="onFilterUpdate($event)" value="Category">
+    <ion-segment-button value="Category">Categories</ion-segment-button>
+    <ion-segment-button value="Courses">All Courses</ion-segment-button>
+  </ion-segment>
+
+  <!-- Display Categories -->
+  <ng-container *ngIf="selectedSegment === 'Category'">
+    <app-categories></app-categories>
+  </ng-container>
+
+  <!-- Display All Courses -->
+  <ng-container *ngIf="selectedSegment === 'Courses'">
+    <app-display-all></app-display-all>
+  </ng-container>
+</ion-content>
