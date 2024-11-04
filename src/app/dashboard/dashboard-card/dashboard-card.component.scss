@@ -1,0 +1,16 @@
+/* Apply this in your global styles or dashboard component CSS file */
+.fixed-size-card {
+    height: 200px; /* Adjust this to match the 3D Modeling card height */
+    width: 100%;   /* Makes the card take full width of the column */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+  }
+  
+  /* Optional: add a max-width if necessary for larger screens */
+  @media (min-width: 768px) {
+    .fixed-size-card {
+      max-width: 250px; /* Adjust based on your 3D Modeling card size */
+    }
+  }

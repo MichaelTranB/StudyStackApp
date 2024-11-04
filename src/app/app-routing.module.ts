@@ -18,7 +18,7 @@ const routes: Routes = [
   {
     path: 'dashboard',
     loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
-    canLoad: [AuthGuard],  
+    canActivate: [AuthGuard]
   },
   {
     path: 'flashcard',
@@ -37,8 +37,8 @@ const routes: Routes = [
     loadChildren: () => import('./shared/courses.module').then(m => m.CoursesModule) // Import practice, study, and quiz here
   },
   {
-    path: 'course-topics',
-    loadChildren: () => import('./src/course-topics/course-topics.module').then( m => m.CourseTopicsPageModule)
+    path: 'course-topics/:courseId',  // Update this path to include courseId as a parameter
+    loadChildren: () => import('./course-topics/course-topics.module').then(m => m.CourseTopicsPageModule)
   }
 ];
 
