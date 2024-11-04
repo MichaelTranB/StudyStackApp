@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { AccountService } from '../account.service'; // Adjust path based on your structure
+import { AngularFirestore } from '@angular/fire/compat/firestore'; // Import Firestore
+import { AuthService } from '../../../auth/auth.service'; // Adjust path based on your structure
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile-picture',
@@ -10,20 +12,34 @@ export class ProfilePictureComponent implements OnInit {
   firstName = '';
   lastName = '';
   email = '';
-  userId = sessionStorage.getItem('userId'); // Pull userId from sessionStorage
+  userId: string | null = null;
 
-  constructor(private accountService: AccountService) {}
+  constructor(
+    private firestore: AngularFirestore,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
-    if (this.userId) {
-      this.accountService.fetchAccount().subscribe((accounts) => {
-        const account = accounts.find((acc) => acc.userId === this.userId);
-        if (account) {
-          this.firstName = account.firstName;
-          this.lastName = account.lastName;
-          this.email = account.email;
-        }
-      });
-    }
+    // Get user ID from AuthService
+    this.authService.userId.pipe(take(1)).subscribe((id) => {
+      if (id) {
+        this.userId = id;
+
+        // Fetch user details from Firestore using the userId
+        this.firestore
+          .collection('users')
+          .doc(id)
+          .get()
+          .pipe(take(1))
+          .subscribe((docSnapshot) => {
+            if (docSnapshot.exists) {
+              const userData = docSnapshot.data() as any;
+              this.firstName = userData.firstName;
+              this.lastName = userData.lastName;
+              this.email = userData.email;
+            }
+          });
+      }
+    });
   }
 }
