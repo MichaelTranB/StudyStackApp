@@ -51,15 +51,14 @@
       {
         "id": 6,
         "name": "Python 1A",
-        "description": "Get started with Python programming for beginners.",
+        "description": "Introduction to Python programming for beginners.",
         "topics": [
-          { "title": "Basic Python Syntax and Data Types" },
+          { "title": "Variables: Introduction to Strings, Integers, Floats, and Booleans" },
+          { "title": "Print Statements and Combining Different Data Types" },
           { "title": "Data Type Conversion and Operators" },
           { "title": "Input Statements and If Conditions" },
           { "title": "Useful Python Functions and Math Operations" },
-          { "title": "Loops in Python" },
-          { "title": "Working with Lists" },
-          { "title": "Manipulating Lists" }
+          { "title": "Loops in Python" }
         ]
       }
     ]

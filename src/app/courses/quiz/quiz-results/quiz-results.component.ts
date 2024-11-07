@@ -11,7 +11,7 @@ export class QuizResultsComponent implements OnInit {
   @Input() correctAnswers: number = 0;
   @Input() totalQuestions: number = 0;
 
-  constructor(private modalCtrl: ModalController) {} 
+  constructor(private modalCtrl: ModalController) {}
 
   ngOnInit(): void {
     if (this.passedQuiz()) {
@@ -24,8 +24,6 @@ export class QuizResultsComponent implements OnInit {
   }
 
   launchConfetti(): void {
-    console.log(confetti);
-    
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
@@ -34,7 +32,7 @@ export class QuizResultsComponent implements OnInit {
       return Math.random() * (max - min) + min;
     }
 
-    const interval: NodeJS.Timeout = setInterval(function () {
+    const interval: ReturnType<typeof setInterval> = setInterval(() => {
       const timeLeft = animationEnd - Date.now();
 
       if (timeLeft <= 0) {
@@ -47,8 +45,7 @@ export class QuizResultsComponent implements OnInit {
     }, 250);
   }
 
-  // Method to dismiss the modal
-  dismiss(): void {
+  close(): void {
     this.modalCtrl.dismiss();
   }
 }
