@@ -63,34 +63,34 @@ export class QuizComponent implements OnInit {
   }
 
   // Move to the next question or show results if at the end
-  nextQuestion(): void {
-    if (this.selectedOption === this.correctAnswer) {
-      this.correctAnswersCount++;
-    }
-
-    if (this.currentQuestionIndex < this.questions.length - 1) {
-      this.currentQuestionIndex++;
-      this.loadCurrentQuestionOptions();
-    } else {
-      this.showResults();
-    }
-  }
-
-  //Use this for testing - completes quiz with all quetions correct after the first one - displays confetti
   // nextQuestion(): void {
   //   if (this.selectedOption === this.correctAnswer) {
   //     this.correctAnswersCount++;
   //   }
-  
-  //   // Temporarily set the score to max and trigger results for testing
-  //   if (this.currentQuestionIndex >= 0) { // Change to 0 to end early
-  //     this.correctAnswersCount = this.questions.length; // Pretend all answers are correct
-  //     this.showResults();
-  //   } else {
+
+  //   if (this.currentQuestionIndex < this.questions.length - 1) {
   //     this.currentQuestionIndex++;
   //     this.loadCurrentQuestionOptions();
+  //   } else {
+  //     this.showResults();
   //   }
   // }
+
+  //Use this for testing - completes quiz with all quetions correct after the first one - displays confetti
+  nextQuestion(): void {
+    if (this.selectedOption === this.correctAnswer) {
+      this.correctAnswersCount++;
+    }
+  
+    // Temporarily set the score to max and trigger results for testing
+    if (this.currentQuestionIndex >= 0) { // Change to 0 to end early
+      this.correctAnswersCount = this.questions.length; // Pretend all answers are correct
+      this.showResults();
+    } else {
+      this.currentQuestionIndex++;
+      this.loadCurrentQuestionOptions();
+    }
+  }
   
 
   // Show results in a modal at the end of the quiz
