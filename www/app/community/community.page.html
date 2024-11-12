@@ -11,7 +11,7 @@
       <ion-card-title>Your Streak</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <h2>{{ streak }} day(s)</h2>
+      <h2>{{ streak }} {{ streak > 1 ? 'days' : 'day' }} 🔥</h2>
     </ion-card-content>
   </ion-card>
 
@@ -21,7 +21,7 @@
       <ion-card-title>Your Personal Best Streak</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <h2>{{ personalBest }} day(s)</h2> <!-- Display the personal best streak -->
+      <h2>{{ personalBest }} {{ personalBest > 1 ? 'days' : 'day' }} 🔥</h2>
     </ion-card-content>
   </ion-card>
 

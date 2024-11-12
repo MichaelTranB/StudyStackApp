@@ -10,7 +10,8 @@ import { ConfigService } from './config.service';
 // Import AngularFire modules
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
-import { AngularFirestoreModule } from '@angular/fire/compat/firestore'; // Import Firestore module
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore'; 
+import { AngularFireStorageModule } from '@angular/fire/compat/storage'; 
 import { StorageModule } from '@ngx-pwa/local-storage';
 
 // Import environment settings
@@ -21,12 +22,13 @@ import { environment } from '../environments/environment';
   imports: [
     BrowserModule,
     HttpClientModule,
-    StorageModule.forRoot({}), // Initialize storage module
+    StorageModule.forRoot({}),
     IonicModule.forRoot(),
     AppRoutingModule,
-    AngularFireModule.initializeApp(environment.firebase), // Firebase initialization
-    AngularFireAuthModule, // Firebase Authentication
-    AngularFirestoreModule // Firebase Firestore
+    AngularFireModule.initializeApp(environment.firebase), 
+    AngularFireAuthModule, 
+    AngularFirestoreModule,
+    AngularFireStorageModule 
   ],
   providers: [
     ConfigService,
